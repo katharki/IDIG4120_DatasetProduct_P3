@@ -1,0 +1,6 @@
+{
+  "dataset_dir": "p2/data/raw",
+  "input_clip": "fold1/124489-9-0-12.wav",
+  "quant_step": 1,
+  "output_dir": "output"
+}
