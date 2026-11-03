@@ -35,7 +35,7 @@ class InvalidShape(Exception):
 
 
 class RoundTripError(Exception):
-    """Lossless settings did not reproduce the input exactly."""
+    """Lossless settings did not reproduce the loaded samples exactly."""
 
 
 EXIT_CODES = {
@@ -252,16 +252,16 @@ def benchmark(root: Path, config: dict) -> dict:
     """Timing and memory evidence for one storage choice on the configured clip.
 
     Compares the original PCM WAV file with APAC at quantization step 1
-    (lossless) and step 4 (lossy; the first step past the measured FLAC
-    crossover point in the p2 evaluation): bytes, encode and decode wall
-    time, and tracemalloc peak memory.
+    (lossless) and step 4 (lossy; the measured FLAC-crossover step in
+    the p2 evaluation): bytes, encode and decode wall time, and
+    tracemalloc peak memory.
     """
     clip = cfg.input_clip(root, config)
     metadata, samples = load_file(clip)
     check_shape(metadata, samples)
     rate = metadata["samplerate"]
     rows = [{
-        "storage": "WAV PCM_16 (original file)",
+        "storage": f"WAV {metadata['subtype']} (original file)",
         "bytes": clip.stat().st_size,
         "encode_s": None, "decode_s": None,
         "encode_peak_mb": None, "decode_peak_mb": None,
