@@ -13,10 +13,7 @@ src/p3/
     config.py              repository root discovery, config loading, derived paths
     integrity.py          manifest build, per-file and per-dataset digest verification
     pipeline.py           the pipeline steps, shape contract, atomic writes, benchmark
-notebooks/
-    01_datasheet.ipynb            the datasheet, the schema, limitations, declarations
-    02_quality_assurance.ipynb    the QA report, all counts from the live run
-    03_pipeline_and_results.ipynb the pipeline, benchmark, failure handling transcript
+IDIG4120_P3_Kivle_Stubø.ipynb   the single notebook: datasheet, schema, QA report, pipeline and results
 tests/                     integrity checks and the four required failure cases
 output/                    run outputs and log, not tracked
 p2/                        the APAC codec, its own repository, not modified
@@ -61,9 +58,9 @@ python -m pytest tests
 
 Covers the integrity layer and the four required failure cases: missing input, digest mismatch, invalid shape, interrupted run.
 
-## Notebooks
+## Notebook
 
-Read them in order: 01 datasheet, 02 QA report, 03 pipeline and results. They run from anywhere inside the repository and print every number from the live run.
+IDIG4120_P3_Kivle_Stubø.ipynb holds the datasheet, the schema, the QA report and the pipeline results in one document. It runs from anywhere inside the repository and prints every number from the live run.
 
 ## Configuration
 
