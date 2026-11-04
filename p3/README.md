@@ -38,8 +38,6 @@ The default run verifies the configured clip against the manifest, loads it, enc
 
 Overrides: `--input PATH` (relative to the dataset dir), `--quant-step N`, `--dataset-dir PATH`.
 
-Exit codes: 0 ok, 2 missing input, 3 digest mismatch, 4 invalid shape, 5 failed round trip, 6 interrupted.
-
 ## Verify a dataset copy
 
 ```text
@@ -47,7 +45,7 @@ python run.py --verify-only
 python run.py --verify-only --dataset-dir PATH/to/full/archive
 ```
 
-The manifest covers the full release: UrbanSound8K.csv plus 8,732 excerpts across fold1 to fold10. This repository carries part of fold1 inside p2/data/raw: 253 of the 873 excerpts, including the configured clip. Absent files are reported without being treated as errors, so a subset works; a digest mismatch or an unexpected file fails with exit code 3.
+The manifest covers the full release: UrbanSound8K.csv plus 8,732 excerpts across fold1 to fold10. This repository carries part of fold1 inside p2/data/raw: 253 of the 873 excerpts, including the configured clip. Absent files are reported without being treated as errors, so a subset works; a digest mismatch or an unexpected file is reported.
 
 ## Tests
 

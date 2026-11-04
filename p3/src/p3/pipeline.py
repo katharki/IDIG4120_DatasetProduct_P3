@@ -32,51 +32,44 @@ from p3 import integrity
 log = logging.getLogger("p3")
 
 
-class InvalidShape(Exception):
+class InvalidShape(ValueError):
     '''Loaded audio violates the int16 (frames, channels) contract.'''
 
 
-class RoundTripError(Exception):
+class RoundTripError(ValueError):
     '''Lossless settings did not reproduce the loaded samples exactly.'''
 
 
-#--- exit codes (run.py) ---
-#Interrupted stays in the same series as the failure codes; anything unmapped is 1.
-EXIT_CODES = {
-    FileNotFoundError: 2,
-    integrity.DigestMismatch: 3,
-    InvalidShape: 4,
-    RoundTripError: 5,
-    KeyboardInterrupt: 6,
-}
-
-#--- save (run_pipeline) ---
+# Save config
 TMP_PREFIX = ".tmp-"    #temp files keep the real extension: writers infer the format from it
 MIB = 2 ** 20           #tracemalloc peaks are reported in MiB
 
-#--- benchmark (the notebook's timing and memory evidence) ---
-BENCH_STEPS = (1, 4)    #1 = lossless, 4 = the lossy FLAC-crossover step from the p2 evaluation
-
-#--- recorded metric precision (results.json) ---
-RATIO_DIGITS = 3
-PERCENT_DIGITS = 2
-RMSE_DIGITS = 6
-TIMING_DIGITS = 4       #encode/decode seconds
-RUN_SECONDS_DIGITS = 3
-TIMESTAMP_TIMESPEC = "seconds"
+# benchmark
+BENCH_STEPS = (1, 4)    #1 = lossless, 4 = lossy
 
 
-def exit_code_for(exc: BaseException) -> int:
-    '''The exit code for one exception; everything unmapped is 1.'''
-    for exc_type, code in EXIT_CODES.items():
-        if isinstance(exc, exc_type):
-            return code
-    return 1
+def timed(func):
+    '''
+        Runs func between perf_counter and tracemalloc: the timing and memory
+        evidence in results.json and benchmark.
+
+        Returns:
+            - tuple: (func's result, wall seconds, tracemalloc peak bytes).
+    '''
+    tracemalloc.start()
+    try:
+        start = time.perf_counter()
+        result = func()
+        seconds = time.perf_counter() - start
+        peak = tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+    return result, seconds, peak
 
 
 def attach_file_log(out_dir: Path) -> logging.Handler:
     '''
-        Append run lines to <out_dir>/run.log; the caller detaches the handler.
+        Appends run lines to <out_dir>/run.log; the caller detaches the handler.
 
         Parameters:
             - out_dir (Path): The output directory, created when missing.
@@ -94,7 +87,7 @@ def attach_file_log(out_dir: Path) -> logging.Handler:
 
 def preflight(root: Path, config: dict) -> dict:
     '''
-        Check that every input exists.
+        Checks that every input exists, before the output directory is created.
 
         Parameters:
             - root (Path): The product root.
@@ -120,8 +113,9 @@ def preflight(root: Path, config: dict) -> dict:
 
 def check_shape(metadata: dict, samples: np.ndarray) -> None:
     '''
-        The audio contract: int16, 2D (frames, channels), consistent with the file header.
-        The structural rules are p2's wav_issues; only the dtype rule is added here.
+        The audio contract: int16, 2D (frames, channels), consistent with the file
+        header. The structural rules are p2's wav_issues; only the dtype rule is
+        added here.
 
         Parameters:
             - metadata (dict): The file header metadata (samplerate, channels, frames).
@@ -138,47 +132,13 @@ def check_shape(metadata: dict, samples: np.ndarray) -> None:
 
 
 def encode(samples: np.ndarray, rate: int, quant_step: int) -> tuple[bytes, float, int]:
-    '''
-        Compress (samples, rate) with one quantization step.
-
-        Parameters:
-            - samples (np.ndarray): (frames, channels) int16 audio.
-            - rate (int): Sample rate in Hz.
-            - quant_step (int): APAC quantization step.
-
-        Returns:
-            - tuple[bytes, float, int]: The APAC blob, wall seconds, tracemalloc peak bytes.
-    '''
-    tracemalloc.start()
-    try:
-        start = time.perf_counter()
-        blob = compress((samples, rate), {"quant_step": quant_step})
-        elapsed = time.perf_counter() - start
-        _, peak = tracemalloc.get_traced_memory()
-    finally:
-        tracemalloc.stop()
-    return blob, elapsed, peak
+    '''Compresses the samples with APAC at one quantization step, timed.'''
+    return timed(lambda: compress((samples, rate), {"quant_step": quant_step}))
 
 
-def decode(blob: bytes) -> tuple[np.ndarray, int, float, int]:
-    '''
-        Decompress an APAC blob.
-
-        Parameters:
-            - blob (bytes): The APAC container bytes.
-
-        Returns:
-            - tuple[np.ndarray, int, float, int]: The samples, rate, wall seconds, tracemalloc peak bytes.
-    '''
-    tracemalloc.start()
-    try:
-        start = time.perf_counter()
-        samples, rate = decompress(blob)
-        elapsed = time.perf_counter() - start
-        _, peak = tracemalloc.get_traced_memory()
-    finally:
-        tracemalloc.stop()
-    return samples, rate, elapsed, peak
+def decode(blob: bytes) -> tuple[tuple[np.ndarray, int], float, int]:
+    '''Decompresses an APAC blob, timed; result is ((samples, rate), seconds, peak bytes).'''
+    return timed(lambda: decompress(blob))
 
 
 def rmse(original: np.ndarray, reconstructed: np.ndarray) -> float:
@@ -190,7 +150,7 @@ def rmse(original: np.ndarray, reconstructed: np.ndarray) -> float:
 
 def run_pipeline(root: Path, config: dict) -> dict:
     '''
-        Run the full pipeline on the configured clip and return the results dict.
+        Runs the full pipeline on the configured clip and returns the results dict.
 
         Steps: preflight, verify against the manifest, load and check the shape,
         encode, decode, check the reconstruction, save. Every step logs one line
@@ -204,11 +164,10 @@ def run_pipeline(root: Path, config: dict) -> dict:
             - dict: The results recorded in results.json.
 
         Raises:
-            - FileNotFoundError: A missing input, exit code 2.
-            - integrity.DigestMismatch: A failed manifest verification, exit code 3.
-            - InvalidShape: Audio that violates the contract, exit code 4.
-            - RoundTripError: A lossless run that is not bit-exact, exit code 5.
-            - KeyboardInterrupt: An interrupted run, exit code 6; no partial outputs.
+            - FileNotFoundError: A missing input.
+            - integrity.DigestMismatch: A failed manifest verification.
+            - InvalidShape: Audio that violates the contract.
+            - RoundTripError: A lossless run that is not bit-exact.
     '''
     paths = preflight(root, config)
     out_dir = cfg.output_dir(root, config)
@@ -241,7 +200,7 @@ def run_pipeline(root: Path, config: dict) -> dict:
         log.info("encode: %d bytes in %.3fs", len(blob), encode_s)
 
         step = "decode"
-        decoded, decoded_rate, decode_s, decode_peak = decode(blob)
+        (decoded, decoded_rate), decode_s, decode_peak = decode(blob)
         log.info("decode: %d frames in %.3fs", decoded.shape[0], decode_s)
 
         step = "check"
@@ -261,16 +220,16 @@ def run_pipeline(root: Path, config: dict) -> dict:
             "quant_step": config["quant_step"],
             "wav_bytes": wav_bytes,
             "apac_bytes": len(blob),
-            "compression_ratio": round(wav_bytes / len(blob), RATIO_DIGITS),
-            "space_saving_percent": round((1 - len(blob) / wav_bytes) * 100, PERCENT_DIGITS),
+            "compression_ratio": round(wav_bytes / len(blob), 3),
+            "space_saving_percent": round((1 - len(blob) / wav_bytes) * 100, 2),
             "bit_exact": bit_exact,
-            "rmse": round(error, RMSE_DIGITS),
-            "encode_seconds": round(encode_s, TIMING_DIGITS),
-            "decode_seconds": round(decode_s, TIMING_DIGITS),
+            "rmse": round(error, 6),
+            "encode_seconds": round(encode_s, 4),
+            "decode_seconds": round(decode_s, 4),
             "encode_peak_bytes": encode_peak,
             "decode_peak_bytes": decode_peak,
-            "run_seconds": round(time.perf_counter() - started, RUN_SECONDS_DIGITS),
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec=TIMESTAMP_TIMESPEC),
+            "run_seconds": round(time.perf_counter() - started, 3),
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "environment": {
                 "python": platform.python_version(),
                 "numpy": np.__version__,
@@ -283,27 +242,30 @@ def run_pipeline(root: Path, config: dict) -> dict:
         try:
             (out_dir / (TMP_PREFIX + "compressed.apac")).write_bytes(blob)
             save_wav(out_dir / (TMP_PREFIX + "decoded.wav"), decoded, decoded_rate)
-            (out_dir / (TMP_PREFIX + "results.json")).write_text(
-                json.dumps(results, indent=2) + "\n", encoding="utf-8")
-            for name in outputs:                #all three exist under temp names: rename them into place
+            (out_dir / (TMP_PREFIX + "results.json")).write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
+
+            # Finalize outputs: rename temporary files into place
+            for name in outputs:
                 os.replace(out_dir / (TMP_PREFIX + name), out_dir / name)
-        except BaseException:                  #all at once or not at all: nothing partial survives
+
+        except BaseException:
             for name in outputs:
                 (out_dir / (TMP_PREFIX + name)).unlink(missing_ok=True)
                 (out_dir / name).unlink(missing_ok=True)
             raise
 
-        log.info("save: compressed.apac, decoded.wav, results.json -> %s",
-                 config["output_dir"])
-        log.info("run finished: bit_exact=%s ratio=%.3f in %.2fs",
-                 bit_exact, results["compression_ratio"], results["run_seconds"])
+        log.info("save: compressed.apac, decoded.wav, results.json -> %s", config["output_dir"])
+        log.info("run finished: bit_exact=%s ratio=%.3f in %.2fs", bit_exact, results["compression_ratio"], results["run_seconds"])
         return results
+
     except KeyboardInterrupt:
         log.error("run interrupted during %s; partial outputs removed", step)
         raise
+
     except Exception as exc:
         log.error("run failed during %s: %s", step, exc)
         raise
+
     finally:
         log.removeHandler(handler)
         handler.close()
@@ -337,15 +299,15 @@ def benchmark(root: Path, config: dict) -> dict:
     }]
     for step in BENCH_STEPS:
         blob, encode_s, encode_peak = encode(samples, rate, step)
-        decoded, decoded_rate, decode_s, decode_peak = decode(blob)
+        (decoded, decoded_rate), decode_s, decode_peak = decode(blob)
         rows.append({
             "storage": f"APAC quant_step {step}",
             "bytes": len(blob),
-            "encode_s": round(encode_s, TIMING_DIGITS),
-            "decode_s": round(decode_s, TIMING_DIGITS),
+            "encode_s": round(encode_s, 4),
+            "decode_s": round(decode_s, 4),
             "encode_peak_mb": round(encode_peak / MIB, 2),
             "decode_peak_mb": round(decode_peak / MIB, 2),
             "bit_exact": bool(decoded_rate == rate and np.array_equal(samples, decoded)),
-            "rmse": round(rmse(samples, decoded), RMSE_DIGITS),
+            "rmse": round(rmse(samples, decoded), 6),
         })
     return {"input_file": config["input_clip"], "rows": rows}

@@ -16,7 +16,7 @@ for entry in (ROOT / "src", ROOT):
 from p3 import config as cfg
 from p3 import integrity
 
-#--- miniature test clip (the fixtures build a tiny dataset instead of touching the shipped one) ---
+#synthetic clip parameters
 CLIP_FRAMES = 100
 CLIP_CHANNELS = 1
 CLIP_RATE = 8000
@@ -25,10 +25,11 @@ CLIP_RATE = 8000
 @pytest.fixture
 def clip(tmp_path):
     '''
-        Writes a minimal PCM_16 clip into tmp_path and returns its path.
+        Creates a minimal PCM_16 clip in tmp_path and returns its path.
     '''
     path = tmp_path / "clip.wav"
     sf.write(path, np.zeros((CLIP_FRAMES, CLIP_CHANNELS), dtype=np.int16), CLIP_RATE, subtype="PCM_16")
+    
     return path
 
 
@@ -49,4 +50,5 @@ def repo(tmp_path, clip):
         "quant_step": 1,
         "output_dir": "output",
     }), encoding="utf-8")
+
     return tmp_path
