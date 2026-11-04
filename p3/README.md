@@ -38,7 +38,7 @@ The default run verifies the configured clip against the manifest, loads it, enc
 
 Overrides: `--input PATH` (relative to the dataset dir), `--quant-step N`, `--dataset-dir PATH`.
 
-Exit codes: 0 ok, 2 missing input, 3 digest mismatch, 4 invalid shape, 5 failed round trip, 130 interrupted.
+Exit codes: 0 ok, 2 missing input, 3 digest mismatch, 4 invalid shape, 5 failed round trip, 6 interrupted.
 
 ## Verify a dataset copy
 
