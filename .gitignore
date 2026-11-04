@@ -10,6 +10,3 @@ __pycache__/
 data/
 output/
 *.wav
-
-# p2 is its own repository (github.com/HexactlyA/idig4120_p2_codec)
-p2/
