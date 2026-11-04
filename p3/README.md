@@ -34,7 +34,7 @@ The p3 package imports the codec from p2/src; the p2 folder sits next to p3 in t
 python run.py
 ```
 
-Verifies the configured clip against the manifest, loads it, encodes with APAC (quant_step 1 = lossless), decodes, asserts a bit-exact round trip of the loaded samples, and writes compressed.apac, decoded.wav and results.json into output/, each file written all at once or not at all. Every step appends one line to output/run.log.
+The default run verifies the configured clip against the manifest, loads it, encodes with APAC (quant_step 1 = lossless), decodes, asserts a bit-exact round trip of the loaded samples, and writes compressed.apac, decoded.wav and results.json into output/, each file written all at once or not at all. Every step appends one line to output/run.log.
 
 Overrides: `--input PATH` (relative to the dataset dir), `--quant-step N`, `--dataset-dir PATH`.
 
@@ -55,7 +55,7 @@ The manifest covers the full release: UrbanSound8K.csv plus 8,732 excerpts acros
 python -m pytest tests
 ```
 
-Covers the integrity layer and the four required failure cases: missing input, digest mismatch, invalid shape, interrupted run.
+The nine tests cover the integrity layer, a full run of the pipeline on the shipped clip, and the four required failure cases: missing input, digest mismatch, invalid shape, interrupted run.
 
 ## Notebook
 
