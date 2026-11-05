@@ -14,6 +14,7 @@ src/p3/
     integrity.py          manifest build, per-file and per-dataset digest verification
     pipeline.py           the pipeline steps, shape contract, all-at-once writes, benchmark
 IDIG4120_P3_Kivle_Stubø.ipynb   the single notebook: datasheet, schema, QA report, pipeline and results
+P3 deklarasjonKI.pdf       the generative-AI declaration
 tests/                     integrity checks and the four required failure cases
 output/                    run outputs and log, not tracked
 ```
