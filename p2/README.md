@@ -36,7 +36,7 @@ The codec does what the original plan asked for:
 
 - uses entropy encoding (Rice, exact per block k search)
 
-- raw and constant block fallbacks, so a block never gets bigger than its 16-bit PCM size
+- raw and constant block fallbacks, so the contents of a block never get bigger than its 16-bit PCM data
 
 - optional DCT pre-shaping (JPEG-style spectral quality 1-100)
 
@@ -78,7 +78,7 @@ idig4120_p2_codec/
 │   └── test_codec.py           # 25 codec tests
 │
 └── data/
-    ├── raw/fold1/              # UrbanSound8K fold1 corpus, not tracked
+    ├── raw/fold1/              # UrbanSound8K fold1 corpus, 253 excerpts tracked
     ├── unseen/                 # held out wav for the unseen input test, not tracked
     ├── compressed/             # scratch outputs, not tracked
     └── decompressed/           # scratch outputs, not tracked
@@ -147,7 +147,7 @@ Why the pipeline looks like it does:
 
 - the quantizer runs closed loop: the predictor always works from reconstructed samples, never the originals. One decision, two guarantees: lossy error cannot drift (it stays within step/2) and lossless decode is bit exact on the same code path.
 
-- Rice coding with an exact k search per block: we price every k with its true bit cost and take the cheapest. If Rice still costs 2 bytes a sample (noise) the block is stored raw, and a block of one constant value costs 3 bytes. No block gets bigger than its PCM size.
+- Rice coding with an exact k search per block: we price every k with its true bit cost and take the cheapest. If Rice still costs 2 bytes a sample (noise) the block is stored raw, and a block of one constant value costs 3 bytes. The contents of a block never get bigger than its PCM data.
 
 - the DCT pre-shaping is an encoder side setting only, the decoder is a no-op and the header records what was done. It works like the JPEG quality parameter, one scalar 1-100 with per-bin steps derived from it. Honest result: the ladder prices like lossless until quality is already ruined as an example q=90 and q=50 cost the same as transparent q=100 on the trial clip while sitting at 41.7 and 30.7 dB, and even q=10 (65.2%, 21.1 dB) loses to quant_step 8 (48.7%, 60.1 dB). As a result so we consider the DCT pre-shaping to be a poor and unsuitable part of the compression pipeline.
 
@@ -200,7 +200,7 @@ Every block starts with a control byte: 0 = raw int16, 1-31 = Rice with k = mode
 
 ## Evaluation
 
-Measured on 60 UrbanSound8K fold1 files (APAC defaults, FLAC via libsndfile PCM_16):
+Measured on 60 UrbanSound8K fold1 files (APAC defaults, FLAC via libsndfile PCM_16). The corpus sweep encodes whatever fold1 subset is present, taking every Nth clip by sorted name up to 60 files; these figures were drawn from the full fold1 (every 14th clip), and the standalone notebook's 15-file table is the same measurement on its shipped subset.
 
 - lossless: APAC 51.6% of 16-bit PCM (median 797 kbit/s, 8.8 bits/sample where raw PCM is 16), FLAC 42.1% (648 kbit/s), so APAC is about 1.23x FLAC, 60/60 bit exact round trips
 
