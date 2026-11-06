@@ -6,8 +6,8 @@
 ## 1. Which dataset, and which question does your project answer?
 
 We used *UrbanSound8K*, 8,732 sound excerpts (at most 4 s) of urban
-sounds in WAV format. The question the project answers is **what
-happens if you make a lossy FLAC**.
+sounds in WAV format. The question the project answers is *what
+happens if you make a lossy FLAC?*.
 
 The codec keeps the FLAC approach, predictive coding with Rice entropy
 and mid-side stereo, and adds quantization of the prediction errors.
@@ -17,8 +17,8 @@ exactly that, and P3 packages the dataset with the codec as a product.
 ## 2. How did each part shape the next?
 
 Each part left the next one with something it needed. P1's audit
-showed the excerpts arrive in a gamut of WAV encodings: 16-bit,
-24-bit, 8-bit unsigned, float, even ADPCM. That was the report's
+showed the excerpts arrive in a gamut of WAV encodings: *16-bit,
+24-bit, 8-bit unsigned, float, even ADPCM*. That was the report's
 implementation concern, and it is why P2 normalizes everything to
 int16 PCM before the codec sees it, with a loader that routes by
 subtype instead of trusting one decoder path.
@@ -50,34 +50,33 @@ lossless codec.
 
 ## 4. Is the dataset fit for use: use, use with controls, investigate, or do not use? What would change it?
 
-**Use with controls.** The dataset was harder to work with than it
-looks, because the excerpts arrive in a gamut of WAV encodings:
-16-bit, 24-bit, 8-bit unsigned, float, even ADPCM. The answer was the
+**Use with controls.** Though not having any problems in terms of
+invalid, mislabeled, corrupted or otherwise deviant data, we found
+dataset was harder to work with than we initially expected due to the
+gamut different WAV encodings.
+
+To simplify the task of making a codec we introduced the
 normalization step to 16-bit PCM before the codec runs: converting
 fold1's 873 files cut their storage by a fifth, 769.76 to 604.31 MiB,
-and that conversion is one of the controls now, next to digest
+with that conversion being one of the controls now, next to digest
 verification before processing, no resampling, and the predefined
 folds kept intact.
 
-What keeps the verdict from plain use is that the class labels have
-not been verified against the audio, and the licence (CC BY-NC 4.0)
-restricts commercial use. Verified labels would change it; the licence
-is the dataset authors' choice and not ours to change.
+For the purposes of making an audio codec this data set has some
+drawbacks; the short length of clips and a bit limited sampling in
+terms of "types" of noise (the classes). For our purposes a dataset
+commited to a single wav encoding and more variation in terms of
+types and lengths of clips would be more fitting.
 
 ## 5. What is still unresolved?
 
-The shortcuts we know about are the stereo and predictor choices. We
-apply mid-side to every stereo pair without adjusting anything, and
-the results notebook measured what that costs on this material,
-roughly 3 to 5% against coding the channels separately; choosing
-mid-side or separate per file, the way FLAC does, is the first thing
-we would change.
+There are some things we would have liked to implement to more
+completely reach our goal of a *lossy* FLAC. These are mostly
+concerning optimizations and features of FLAC that we did not end up
+implementing. Among these the most noteworthy are our choice to
+always apply mid-side pairing when encoding audio channels in pairs
+and improve the more advanced predictors as they are currently not
+providing much improvement.
 
-The predictors are the same story: LPC almost never earns the
-coefficient bytes it puts on the wire, and LMS would have to get much
-faster before its small win is worth it.
-
-The codec also stops at int16, so the precision in the dataset's wider
-and float files is spent at load; keeping it would mean a wider
-working format. These are the things we would do differently given
-more time.
+For future work we would also like to add support for more
+WAV-formats than only PCM16 to more accurately mirror FLAC.
