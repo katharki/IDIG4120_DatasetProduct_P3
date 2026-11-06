@@ -1,5 +1,7 @@
 # UrbanSound8K dataset product (P3)
 
+The repository map and the quick start live in the README at the root.
+
 UrbanSound8K packaged with a reproducible compression pipeline: a datasheet, a quality assurance report, a SHA-256 manifest, one entry point, failure handling tests, and recorded results. The codec is APAC from the p2 folder of this repository, imported as a dependency.
 
 ## Layout
