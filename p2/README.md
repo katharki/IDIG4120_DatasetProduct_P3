@@ -204,7 +204,7 @@ Measured on 60 UrbanSound8K fold1 files (APAC defaults, FLAC via libsndfile PCM_
 
 - lossless: APAC 51.6% of 16-bit PCM (median 797 kbit/s, 8.8 bits/sample where raw PCM is 16), FLAC 42.1% (648 kbit/s), so APAC is about 1.23x FLAC, 60/60 bit exact round trips
 
-- lossy: step 4 is the first step under FLAC (42.5% of PCM, median SNR 68.8 dB), steps 8/16/32 reach 36.3 / 30.1 / 24.4% of PCM (5.8 / 4.8 / 3.9 bits/sample, 512 / 432 / 355 kbit/s median)
+- lossy: step 4 is the first step under FLAC (42.5% of PCM, median SNR 68.8 dB, worst-file SNR 27.3 dB), steps 8/16/32 reach 36.3 / 30.1 / 24.4% of PCM (5.8 / 4.8 / 3.9 bits/sample, 512 / 432 / 355 kbit/s median)
 
 - throughput on test-machine: encode about 16.6 MB/s, decode 7.6 MB/s
 
