@@ -1,4 +1,4 @@
-numpy>=1.26
-soundfile>=0.12
-pandas>=1.5
-pytest>=8
+numpy==2.3.3
+soundfile==0.13.1
+pandas==3.0.1
+pytest==9.0.2
