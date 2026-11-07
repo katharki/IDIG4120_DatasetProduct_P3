@@ -57,10 +57,10 @@ gamut different WAV encodings.
 
 To simplify the task of making a codec we introduced the
 normalization step to 16-bit PCM before the codec runs: converting
-fold1's 873 files cut their storage by a fifth, 769.76 to 604.31 MiB,
-with that conversion being one of the controls now, next to digest
-verification before processing, no resampling, and the predefined
-folds kept intact.
+the full release cut its storage by 17.43%, from 6,760.26 to
+5,581.96 MiB, with that conversion being one of the controls now,
+next to digest verification before processing, no resampling, and
+the predefined folds kept intact.
 
 For the purposes of making an audio codec this data set has some
 drawbacks; the short length of clips and a bit limited sampling in
