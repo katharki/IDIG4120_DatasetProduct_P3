@@ -77,6 +77,12 @@ idig4120_p2_codec/
 │   ├── test_format.py          # 13 format tests
 │   └── test_codec.py           # 25 codec tests
 │
+├── notebooks/
+│   ├── codec_results.ipynb     # the results notebook: sweeps, ladders, the loader bug, edge cases
+│   ├── codec_standalone.ipynb  # runs from the codec source alone, 15-file table
+│   ├── fold1/                  # 15 demo clips for the standalone notebook
+│   └── unseen/                 # held out wav for the standalone notebook's unseen-input section
+│
 └── data/
     ├── raw/fold1/              # UrbanSound8K fold1 corpus, 253 excerpts tracked
     ├── unseen/                 # held out wav for the unseen input test, not tracked
