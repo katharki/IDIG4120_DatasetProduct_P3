@@ -34,9 +34,11 @@ files come from the P1 audit.
 
 The strongest evidence is **the lossy range**: it gets below FLAC's
 size with the error bounded by design, at most half the quantization
-step per sample. Step 4 already lands around FLAC's size (42.5% of
-PCM against 42.1%) and the deeper steps go clearly under it, down to
-24.4% at step 32. What the loss does to the sound is not in these
+step per sample. The corpus sweep puts numbers on each quality level: step 2
+compresses to 48.8% of PCM at a median SNR of 73.5 dB, step 4 is the
+first below FLAC (42.5% of PCM against 42.1%, 68.8 dB), and steps 8,
+16, and 32 land at 36.3%, 30.1%, and 24.4% of PCM with median SNRs of
+63.3, 57.4, and 51.4 dB. What the loss does to the sound is not in these
 numbers, so the results notebook plays the same clip at several
 steps, and the note there records where the difference becomes
 audible.
