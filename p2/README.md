@@ -200,11 +200,11 @@ Every block starts with a control byte: 0 = raw int16, 1-31 = Rice with k = mode
 
 ## Evaluation
 
-Measured on 60 UrbanSound8K fold1 files (APAC defaults, FLAC via libsndfile PCM_16). The corpus sweep encodes whatever fold1 subset is present, taking every Nth clip by sorted name up to 60 files; these figures were drawn from the full fold1 (every 14th clip), and the standalone notebook's 15-file table is the same measurement on its shipped subset.
+Measured over the full release - all 10 folds, 8732 UrbanSound8K excerpts (APAC defaults, FLAC via libsndfile PCM_16), recorded in the full-release sweep cell of notebooks/codec_results.ipynb. The corpus sweep cell there is the same measurement on a 60-file fold1 sample, and the standalone notebook's 15-file table is the same measurement on its shipped subset.
 
-- lossless: APAC 51.6% of 16-bit PCM (median 797 kbit/s, 8.8 bits/sample where raw PCM is 16), FLAC 42.1% (648 kbit/s), so APAC is about 1.23x FLAC, 60/60 bit exact round trips
+- lossless: APAC 57.0% of 16-bit PCM (median 840 kbit/s, 9.4 bits/sample where raw PCM is 16), FLAC 47.4% (687 kbit/s), so APAC is about 1.2x FLAC, 8732/8732 bit exact round trips
 
-- lossy: step 4 is the first step under FLAC (42.5% of PCM, median SNR 68.8 dB, worst-file SNR 27.3 dB), steps 8/16/32 reach 36.3 / 30.1 / 24.4% of PCM (5.8 / 4.8 / 3.9 bits/sample, 512 / 432 / 355 kbit/s median)
+- lossy: step 4 is the first step under FLAC (46.4% of PCM, median SNR 67.6 dB, worst-file SNR 17.6 dB), steps 8/16/32 reach 40.1 / 34.0 / 28.0% of PCM (6.4 / 5.4 / 4.5 bits/sample, 566 / 475 / 393 kbit/s median)
 
 - throughput on test-machine: encode about 16.6 MB/s, decode 7.6 MB/s
 

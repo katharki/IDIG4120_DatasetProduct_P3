@@ -56,10 +56,10 @@ p2/data/raw, and absent files are not treated as errors, so a subset works.
 
 ## Evaluation
 
-Measured on 60 UrbanSound8K fold1 files: lossless APAC is 51.6% of 16-bit
-PCM, about 1.23x FLAC, 60/60 bit exact round trips; step 4 is the first
-lossy step under FLAC (42.5% of PCM, median SNR 68.8 dB). The full tables
-live in p2/README.md.
+Measured over the full release, all 10 folds / 8732 excerpts: lossless APAC
+is 57.0% of 16-bit PCM, about 1.2x FLAC, 8732/8732 bit exact round trips;
+step 4 is the first lossy step under FLAC (46.4% of PCM, median SNR
+67.6 dB). The full tables live in p2/README.md.
 
 ## Tests
 
