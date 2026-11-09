@@ -63,9 +63,9 @@ next to digest verification before processing, no resampling, and
 the predefined folds kept intact.
 
 For the purposes of making an audio codec this data set has some
-drawbacks; the short length of clips and a bit limited sampling in
-terms of "types" of noise (the classes). For our purposes a dataset
-committed to a single wav encoding and more variation in terms of
+drawbacks: clips are short, with limited variation in sound classes
+(10) and clip lengths (at most 4 s). For our purposes a dataset
+committed to a single WAV encoding and more variation in terms of
 types and lengths of clips would be more fitting.
 
 ## 5. What is still unresolved?
@@ -76,7 +76,8 @@ concerning optimizations and features of FLAC that we did not end up
 implementing. Among these the most noteworthy are our choice to
 always apply mid-side pairing when encoding audio channels in pairs
 and improve the more advanced predictors as they are currently not
-providing much improvement.
+providing much improvement. Performance is another candidate: decoding runs several times slower than encoding (about 7.6 against 16.6 MB/s on our test machine) because the block walker is a Python loop, and there are further gains in struct packing (some possibilities already marked with TODOs in format specification). Both are
+optimization efforts we would reserve for a v2.
 
 For future work we would also like to add support for more
 WAV-formats than only PCM16 to more accurately mirror FLAC.
