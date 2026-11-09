@@ -50,10 +50,10 @@ we added over FLAC is the lossy range, not a better lossless codec.
 
 ## 4. Is the dataset fit for use: use, use with controls, investigate, or do not use? What would change it?
 
-**Use with controls.** Though not having any problems in terms of
-invalid, mislabeled, corrupted or otherwise deviant data, we found the
-dataset was harder to work with than we initially expected due to the
-gamut of different WAV encodings.
+**Use with controls.** Though we found no invalid, mislabeled,
+corrupted or otherwise deviant data, the dataset was harder to work
+with than we initially expected due to the gamut of different WAV
+encodings.
 
 To simplify the task of making a codec we introduced the
 normalization step to 16-bit PCM before the codec runs: converting
@@ -76,8 +76,13 @@ concerning optimizations and features of FLAC that we did not end up
 implementing. Among these the most noteworthy are our choice to
 always apply mid-side pairing when encoding audio channels in pairs
 and improve the more advanced predictors as they are currently not
-providing much improvement. Performance is another candidate: decoding runs several times slower than encoding (about 7.6 against 16.6 MB/s on our test machine) because the block walker is a Python loop, and there are further gains in struct packing (some possibilities already marked with TODOs in format specification). Both are
-optimization efforts we would reserve for a v2.
+providing much improvement. Performance is another candidate:
+decoding runs several times slower than encoding (about 7.6
+against 16.6 MB/s on our test machine) because the block walker is
+a Python loop, and there are further gains in struct packing (some
+possibilities already marked with TODOs in the format
+specification). Both are optimization efforts we would reserve for
+a v2.
 
 For future work we would also like to add support for more
 WAV-formats than only PCM16 to more accurately mirror FLAC.
