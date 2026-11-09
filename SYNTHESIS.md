@@ -35,20 +35,18 @@ files come from the P1 audit.
 The strongest evidence is **the lossy range**: it gets below FLAC's
 size with the error bounded by design, at most half the quantization
 step per sample. The full-release sweep, all 8732 excerpts, puts numbers
-on each quality level: step 2 compresses to 52.7% of PCM at a median SNR
-of 73.0 dB, step 4 is the first below FLAC (46.4% of PCM against 47.4%,
-67.6 dB), and steps 8, 16, and 32 land at 40.1%, 34.0%, and 28.0% of PCM
-with median SNRs of 62.0, 56.2, and 50.2 dB. What the loss does to the
-sound is not in these numbers, so the results notebook plays the same
-clip at several steps, and the note there records where the difference
-becomes audible.
+on each quality level. Step 2 compresses to 52.7% of PCM at a median SNR
+of 73.0 dB. Step 4 is the first below FLAC, 46.4% of PCM against 47.4%,
+at 67.6 dB. The remaining steps live in the results notebook's tables.
+What the loss does to the sound is not in these numbers, so the results
+notebook plays the same clip at several steps, and the note there records
+where the difference becomes audible.
 
 The main limitation is **the lossless side**: FLAC is simply better
-there, 47.4% of PCM against our 57.0%, and the advanced machinery
-never closed the gap; LPC loses to the simple fixed predictor on most
-of the clips we tested, and LMS is a little better at many times the
-cost. What we added over FLAC is the lossy range, not a better
-lossless codec.
+there, 47.4% of PCM against our 57.0%, and the advanced machinery never
+closed the gap. LPC loses to the simple fixed predictor on most of the
+clips we tested, and LMS is a little better at many times the cost. What
+we added over FLAC is the lossy range, not a better lossless codec.
 
 ## 4. Is the dataset fit for use: use, use with controls, investigate, or do not use? What would change it?
 

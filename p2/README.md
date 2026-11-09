@@ -206,7 +206,7 @@ Every block starts with a control byte: 0 = raw int16, 1-31 = Rice with k = mode
 
 ## Evaluation
 
-Measured over the full release - all 10 folds, 8732 UrbanSound8K excerpts (APAC defaults, FLAC via libsndfile PCM_16), recorded in the full-release sweep cell of notebooks/codec_results.ipynb. The corpus sweep cell there is the same measurement on a 60-file fold1 sample, and the standalone notebook's 15-file table is the same measurement on its shipped subset.
+All numbers come from the full release, all 10 folds and 8732 UrbanSound8K excerpts, APAC defaults against FLAC via libsndfile (PCM_16). The full-release sweep cell in notebooks/codec_results.ipynb records the measurement. The corpus sweep cell there is the same measurement on a 60-file fold1 sample, and the standalone notebook's 15-file table covers its shipped subset.
 
 - lossless: APAC 57.0% of 16-bit PCM (median 840 kbit/s, 9.4 bits/sample where raw PCM is 16), FLAC 47.4% (687 kbit/s), so APAC is about 1.2x FLAC, 8732/8732 bit exact round trips
 

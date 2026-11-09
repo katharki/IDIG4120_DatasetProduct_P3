@@ -1,8 +1,8 @@
 # IDIG4120 P1-P3
 
-UrbanSound8K from dataset audit to packaged dataset product, the course
-project for IDIG4120 Digital Information Processing. Three parts build on
-each other: the audit fixes the baseline representation, the codec
+The course project for IDIG4120 Digital Information Processing:
+UrbanSound8K, from dataset audit to packaged dataset product. Three parts
+build on each other: the audit fixes the baseline representation, the codec
 compresses it, the product packages the dataset with a reproducible
 pipeline.
 
@@ -16,7 +16,7 @@ notebook.
 ## Requirements
 
 Python 3.10 or newer. pip install -r p3/requirements.txt (numpy, soundfile,
-pandas, pytest) covers p2 and p3; the p1 notebook also uses scipy and
+pandas, pytest) covers p2 and p3. The p1 notebook also uses scipy and
 matplotlib.
 
 ## The codec (p2)
@@ -39,7 +39,7 @@ the settings, the wire format and the full evaluation.
 ## The dataset product (p3)
 
 The product packages the dataset with a SHA-256 manifest and one entry
-point; the codec is APAC from the p2 folder, imported as a dependency. From
+point. The codec is APAC from the p2 folder, imported as a dependency. From
 p3:
 
 ```text
@@ -50,16 +50,16 @@ python run.py --verify-only --dataset-dir PATH/to/full/archive
 The default run verifies the configured clip against the manifest, encodes
 with APAC, decodes, asserts a bit-exact round trip and writes
 compressed.apac, decoded.wav and results.json into output/. The manifest
-covers the full release, UrbanSound8K.csv plus 8,732 excerpts across fold1
-to fold10; this repository carries 253 of the 873 fold1 excerpts inside
-p2/data/raw, and absent files are not treated as errors, so a subset works.
+covers the full release, UrbanSound8K.csv plus 8,732 excerpts. The
+repository carries 253 of the 873 fold1 excerpts in p2/data/raw. Missing
+files are not errors, so a subset works.
 
 ## Evaluation
 
-Measured over the full release, all 10 folds / 8732 excerpts: lossless APAC
-is 57.0% of 16-bit PCM, about 1.2x FLAC, 8732/8732 bit exact round trips;
-step 4 is the first lossy step under FLAC (46.4% of PCM, median SNR
-67.6 dB). The full tables live in p2/README.md.
+Over the full release, all 10 folds and 8732 excerpts, lossless APAC is
+57.0% of 16-bit PCM against FLAC's 47.4%, about 1.2x, with 8732/8732 bit
+exact round trips. Step 4 is the first lossy step under FLAC: 46.4% of
+PCM at a median SNR of 67.6 dB. The full tables live in p2/README.md.
 
 ## Tests
 
