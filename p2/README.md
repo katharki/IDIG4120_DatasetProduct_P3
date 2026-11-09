@@ -75,7 +75,7 @@ idig4120_p2_codec/
 │
 ├── test/
 │   ├── test_format.py          # 13 format tests
-│   └── test_codec.py           # 25 codec tests
+│   └── test_codec.py           # 27 codec tests
 │
 ├── notebooks/
 │   ├── codec_results.ipynb     # the results notebook: sweeps, ladders, the loader bug, edge cases
