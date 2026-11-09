@@ -53,7 +53,7 @@ compressed.apac, decoded.wav and results.json into output/. The manifest
 covers the full release, UrbanSound8K.csv plus 8,732 excerpts. The
 repository carries 253 of the 873 fold1 excerpts in p2/data/raw. The
 results notebook can fetch the full release from Kaggle, see p2/README.md.
-Missing files are not errors, so a subset works.
+Missing files are not errors, so a subset works. If needed, the full dataset can be downloaded by changing the `DOWNLOAD_DATASET` variable in `p2/notebooks/codec_results.ipynb` and running the first two cells. The full dataset will then be downloaded and placed in the repository.
 
 ## Evaluation
 
