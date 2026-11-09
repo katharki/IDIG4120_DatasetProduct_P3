@@ -21,7 +21,7 @@ def load_folder(folder: Path) -> list[tuple[dict, np.ndarray]]:
         - FileNotFoundError: If the folder does not exist or is not a folder.
     
     Note:
-        - Might OOM if the folder contains a large number of or very large audio files. #TODO: fix?
+        - Might OOM if the folder contains a large number of or very large audio files.
     '''
     if not folder.exists():
         raise FileNotFoundError(f"No such folder: '{folder}'")
@@ -59,7 +59,7 @@ def load_file(infile: Path) -> tuple[dict, np.ndarray]:
         raise FileNotFoundError(f"No such file: '{infile}'")
 
     if not infile.suffix:
-        raise ValueError(f"File has no suffix: '{infile}'") # TODO: not necessarily an error, consider inferring from content
+        raise ValueError(f"File has no suffix: '{infile}'")
 
     # match case is for eventual support of more file types in the future (sort of already supported through soundfile, but metadata might differ (not in scope of assignment))
     match infile.suffix:
@@ -87,7 +87,7 @@ def load_wav(infile: Path) -> tuple[dict, np.ndarray]:
         - ValueError: If the WAV file cannot be loaded.
 
     Notes:
-        - Audio data is always a 2d array #TODO: Consider changing to 1d for mono audio for better compression.
+        - Audio data is always a 2d array
         - Subtypes wider than 16 bits (PCM_24/PCM_32) and float subtypes (FLOAT/DOUBLE) are read at native
           precision and quantized to int16 with round + clip (max error 1/2 LSB per sample). PCM_U8/PCM_16,
           u-law, a-law and ADPCM files use libsndfile's int16 read directly, which is measured correct there.

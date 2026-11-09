@@ -51,8 +51,9 @@ The default run verifies the configured clip against the manifest, encodes
 with APAC, decodes, asserts a bit-exact round trip and writes
 compressed.apac, decoded.wav and results.json into output/. The manifest
 covers the full release, UrbanSound8K.csv plus 8,732 excerpts. The
-repository carries 253 of the 873 fold1 excerpts in p2/data/raw. Missing
-files are not errors, so a subset works.
+repository carries 253 of the 873 fold1 excerpts in p2/data/raw. The
+results notebook can fetch the full release from Kaggle, see p2/README.md.
+Missing files are not errors, so a subset works.
 
 ## Evaluation
 
@@ -64,7 +65,7 @@ PCM at a median SNR of 67.6 dB. The full tables live in p2/README.md.
 ## Tests
 
 ```text
-python -m pytest test      # from p2: 38 format and codec tests
+python -m pytest test      # from p2: 40 format and codec tests
 python -m pytest tests     # from p3: 9 integrity, pipeline and failure tests
 ```
 

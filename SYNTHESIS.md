@@ -51,9 +51,9 @@ we added over FLAC is the lossy range, not a better lossless codec.
 ## 4. Is the dataset fit for use: use, use with controls, investigate, or do not use? What would change it?
 
 **Use with controls.** Though not having any problems in terms of
-invalid, mislabeled, corrupted or otherwise deviant data, we found
+invalid, mislabeled, corrupted or otherwise deviant data, we found the
 dataset was harder to work with than we initially expected due to the
-gamut different WAV encodings.
+gamut of different WAV encodings.
 
 To simplify the task of making a codec we introduced the
 normalization step to 16-bit PCM before the codec runs: converting
@@ -65,7 +65,7 @@ the predefined folds kept intact.
 For the purposes of making an audio codec this data set has some
 drawbacks; the short length of clips and a bit limited sampling in
 terms of "types" of noise (the classes). For our purposes a dataset
-commited to a single wav encoding and more variation in terms of
+committed to a single wav encoding and more variation in terms of
 types and lengths of clips would be more fitting.
 
 ## 5. What is still unresolved?

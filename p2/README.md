@@ -4,7 +4,7 @@ APAC (Another Predictive Audio Codec), a lossless and lossy audio codec for 16-b
 
 ## Inspiration/learning material
 
-Two informative videos on how the FLAC codec works by kleines Filmröllchen, we tried to avoid copying everything and added somethings of our own by turning FLAC into a lossy and hopefully get a similar or better compression ratio as a result (time will tell)
+Two informative videos on how the FLAC codec works by kleines Filmröllchen, we tried to avoid copying everything and added some things of our own by turning FLAC into a lossy and hopefully get a similar or better compression ratio as a result (see the Evaluation section)
 
 But what is digital audio? (The FLAC Codec #1 – (Digital) Audio and PCM)
 [Link](https://www.youtube.com/watch?v=jOewLgvH_js)
@@ -85,7 +85,7 @@ idig4120_p2_codec/
 │
 └── data/
     ├── raw/fold1/              # UrbanSound8K fold1 corpus, 253 excerpts tracked
-    ├── unseen/                 # held out wav for the unseen input test, not tracked
+    ├── raw/unseen/             # held out wav, tracked, input for the unseen round trip test
     ├── compressed/             # scratch outputs, not tracked
     └── decompressed/           # scratch outputs, not tracked
 ```
@@ -126,6 +126,12 @@ quality 0-100 maps onto the quantization step: 100 is lossless, every 20 points 
 
 One file metrics: python evaluation.py original.wav compressed.apac (--decoded out.wav to reuse a decoded file).
 
+## Notebooks
+
+notebooks/codec_standalone.ipynb runs from the codec source alone and works on the shipped clips in notebooks/fold1 and notebooks/unseen, nothing else needed.
+
+notebooks/codec_results.ipynb reads data/raw. The repo ships 253 of the 873 fold1 excerpts, enough for the demo and corpus sections. For the full-release sweep (all 10 folds, 8732 clips), set DOWNLOAD_DATASET = True at the top of the first cell: the next cell then downloads the full release from Kaggle (https://www.kaggle.com/datasets/chrisfilo/urbansound8k) into data/raw before the rest of the notebook runs. It needs pip install kagglehub, no Kaggle account, and files already present are kept, so reruns only add what is missing. With the default False the full-release sweep covers only the shipped clips and prints a note saying so.
+
 ## Processing Pipeline
 
 Encoding:
@@ -147,7 +153,7 @@ Why the pipeline looks like it does:
 
 - int16 is the working format everywhere. This was done to simplify the codec and to standardize inputs. The choice of int16 was due to it being a middle ground between the high and low fidelity quanta, the decoder never touches floats, wider inputs are cast once on load.
 
-- stereo pairs go mid-side before prediction. Correlated channels leave the side plane small, and every plane block carries its own Rice k, so side is close to free. M and S need 17 bits a plane that does not compress when processed is stored as raw PCM16, so the worst case is the PCM size.
+- stereo pairs go mid-side before prediction. Correlated channels leave the side plane small, and every plane block carries its own Rice k, so side is close to free. M and S need 17 bits. A plane that does not compress when processed is stored as raw PCM16, so the worst case is the PCM size.
 
 - prediction removes what the entropy coder would otherwise pay for. FIXED orders 1-4 are cheap, LPC fits each block, LMS adapts sample by sample. Honest result: the results notebook prices LPC across orders 1-32 and the per-block fit rarely earns its side information. The best order is 1-2 (a per-block fitted gain): a one point win over fixed-2 on the impact clip, half a point behind on the tonal clip, 10 points behind on the quiet clip, and lms-4 stays ahead of every order. From order 2 up the windowed fit degrades on two of three clips while every extra coefficient adds 2 bytes of side information per block plane. In most cases it increases the size of the compressed files.
 
@@ -155,13 +161,13 @@ Why the pipeline looks like it does:
 
 - Rice coding with an exact k search per block: we price every k with its true bit cost and take the cheapest. If Rice still costs 2 bytes a sample (noise) the block is stored raw, and a block of one constant value costs 3 bytes. The contents of a block never get bigger than its PCM data.
 
-- the DCT pre-shaping is an encoder side setting only, the decoder is a no-op and the header records what was done. It works like the JPEG quality parameter, one scalar 1-100 with per-bin steps derived from it. Honest result: the ladder prices like lossless until quality is already ruined as an example q=90 and q=50 cost the same as transparent q=100 on the trial clip while sitting at 41.7 and 30.7 dB, and even q=10 (65.2%, 21.1 dB) loses to quant_step 8 (48.7%, 60.1 dB). As a result so we consider the DCT pre-shaping to be a poor and unsuitable part of the compression pipeline.
+- the DCT pre-shaping is an encoder side setting only, the decoder is a no-op and the header records what was done. It works like the JPEG quality parameter, one scalar 1-100 with per-bin steps derived from it. Honest result: the ladder prices like lossless until quality is already ruined as an example q=90 and q=50 cost the same as transparent q=100 on the trial clip while sitting at 41.7 and 30.7 dB, and even q=10 (65.2%, 21.1 dB) loses to quant_step 8 (48.7%, 60.1 dB). As a result we consider the DCT pre-shaping to be a poor and unsuitable part of the compression pipeline.
 
 - the 33 byte header is all the side information there is. The decoder configures itself from it, decompress takes no settings, and there are no per block lengths on the wire: Rice blocks end where decoding stops, raw blocks have a fixed size.
 
 - what separates us from FLAC: the lossy side (quantized residuals with a bounded error guarantee) and the optional DCT pre-shaping.
 
-- empty input and other invalid data is rejected by different checks and validations troughout the different stages of loading, preprocessing, and encoding.
+- empty input and other invalid data is rejected by different checks and validations throughout the different stages of loading, preprocessing, and encoding.
 
 ### Challenges during implementation
 
@@ -224,13 +230,13 @@ Notes:
 
 python -m pytest test
 
-38 tests: 13 format (header and control byte round trips, every corruption path, the block size cap) and 25 codec (entropy, prediction, planes, block modes, end to end, dct quality bounds, input edges: empty wav rejected, tiny inputs, float wav routing, one held out file). conftest.py puts src on the path. The held out file test skips until a wav lands in data/unseen/. Test inputs come from seeded numpy generators and the codec has no randomness, so runs are reproducible.
+40 tests: 13 format (header and control byte round trips, every corruption path, the block size cap) and 27 codec (entropy, prediction, planes, block modes, end to end, dct quality bounds, input edges: empty wav rejected, tiny inputs, float wav routing, one held out file). conftest.py puts src on the path. The held out file test runs against the tracked wav in data/raw/unseen. Test inputs come from seeded numpy generators and the codec has no randomness, so runs are reproducible.
 
 ## NOTES
 
 ### Discovery of inaccuracy in libsndfile
 
-To avoid doing too much work in terms of correct file conversion we decided to use the python package soundfile which again uses the C library libsndfile to convert between different subtypes of WAV coding. Being curious how this was done we examined the sourcecode and found that there are some scenarios where conversion does not match rounding to nearest PCM or step. An example of this is the conversion from 24-bit to 16-bit (quite relevant for us), here there is no rounding but rather a 8 bit shift keeping the 16 most significant bits, depending on what is considered nearest (do we round up or down?) this can differ. The differences are quite negligeble for our purposes, but it was interesting none the less.
+To avoid doing too much work in terms of correct file conversion we decided to use the python package soundfile which again uses the C library libsndfile to convert between different subtypes of WAV coding. Being curious how this was done we examined the sourcecode and found that there are some scenarios where conversion does not match rounding to nearest PCM or step. An example of this is the conversion from 24-bit to 16-bit (quite relevant for us), here there is no rounding but rather a 8 bit shift keeping the 16 most significant bits, depending on what is considered nearest (do we round up or down?) this can differ. The differences are quite negligible for our purposes, but it was interesting nonetheless.
 
 This is why load_wav reads by WAV subtype: int16 only where libsndfile was measured correct (PCM_U8/PCM_16, ULAW/ALAW, ADPCM), and float64 with clip(round(x*32767)) for PCM_24/PCM_32/FLOAT/DOUBLE (the int16 path returns all zeros for float WAVs on this machine).
 

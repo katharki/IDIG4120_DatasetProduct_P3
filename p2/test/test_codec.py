@@ -350,9 +350,9 @@ def test_load_wav_casts_float_wav(tmp_path):
 
 def test_unseen_file_roundtrip():
     '''One held-out real-world wav (not from the corpus) is bit-exact at step 1 and bounded at step 8.'''
-    unseen = sorted((Path(__file__).resolve().parents[1] / "data" / "unseen").glob("*.wav"))
+    unseen = sorted((Path(__file__).resolve().parents[1] / "data" / "raw" / "unseen").glob("*.wav"))
     if not unseen:
-        pytest.skip("no held-out file yet: drop a wav (about 1 min, not UrbanSound8K) into data/unseen/")
+        pytest.skip("no held-out file yet: drop a wav (about 1 min, not UrbanSound8K) into data/raw/unseen/")
     metadata, original = load_wav(unseen[0])
     back, rate = decompress(compress((original, metadata["samplerate"]), {}))
     assert np.array_equal(back, original) and rate == metadata["samplerate"]
